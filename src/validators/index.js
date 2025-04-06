@@ -8,7 +8,7 @@ const userRegistrationValidator=()=>{
             .isEmail().withMessage("Email is invalid"),
         body('username')
             .trim()
-            .notEmpty.withMessage("Username is required")
+            .notEmpty().withMessage("Username is required")
             .isLength({min:3}).withMessage("username should atleast 3char")
             .isLength({max:13}).withMessage("username can't exceed 13char")
     ]
