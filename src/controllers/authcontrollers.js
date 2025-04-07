@@ -1,51 +1,49 @@
 import { ApiResponse } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import crypto from "crypto";
 import {User} from "../models/user.models.js"
 import { emailVerificationMailGenContent, SendMail } from "../utils/mail.js";
 
-const registerUser=asyncHandler(async(req,res)=>{
-    const {email,username,password,role}=req.body
+const registerUser = asyncHandler(async (req, res) => {
+  const { email, username, password, role } = req.body;
+  const existingUser = await User.findOne({ email });
 
-        const existingUser=await User.findOne({email});
-        
-        if(existingUser){
-            return res.status(200).json(new ApiResponse(200,{message:"Success"}))
-        }
+  if (existingUser) {
+    return res
+      .status(409)
+      .json(new ApiResponse(409, { message: "User already exists" }));
+  }
 
-        const user=User.create({
-            username:username,
-            email:email,
-            password:password,
-            role:role,
-        })
+  const user = await User.create({
+    username,
+    email,
+    password,
+    role,
+  });
 
-        //create verification Token
+  // create verification token
 
-        const token=crypto.randomBytes(32).toString("hex");
+  const {hasedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
-        user.emailVerficationToken=token
+//   console.log(token);
+  user.emailVerificationToken =hasedToken
+  user.emailVerficationExpiry=tokenExpiry
 
-        await user.save();
+  await user.save();
 
-    
-        SendMail({
-            email:user.email,
-            subject:"Verify Your Email",
-            mailGencontent:emailVerificationMailGenContent({
-                Username:user.username,
-                VerificationUrl:`Verify Your Email By Click folowwing link
-            ${process.env.BASE_URL}/api/v1/users/verify/${Token}`
-            })
+  // send verification email
+  
+  await SendMail({
+    email: user.email,
+    subject: "Verify Your Email",
+    mailGencontent: emailVerificationMailGenContent(
+      user.username,
+      `${process.env.BASE_URL}/api/v1/users/verify/${unHashedToken}`,
+    ),
+  });
 
-        })
+  return res
+    .status(201)
+    .json(new ApiResponse(201, { message: "User registered. Please verify your email." }));
+});
 
-
-    
-
-    
-    //validation
-    
-})
-
-export {registerUser}
+export { registerUser };

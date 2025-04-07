@@ -4,18 +4,20 @@ import { ApiError } from "../utils/api.error.js";
     const validate=(req,res,next)=>{
     const errors=validationResult(req);
 
-    console.log(errors);
+    console.log(errors.array());
 
-    // if(errors.isEmpty()){
-    //     return next()
-    // }
+
+    if(errors.isEmpty()){
+        return next()
+    }
     
-    // const extractedError=[]
-    // errors.array().map((err)=>extractedError.push({
-    //     [err.path]:err.msg
-    // }))
+    const extractedError=[]
+    errors.array().map((err)=>extractedError.push({
+        [err.path]:err.msg
+    }))
 
-    // throw new ApiError(422,"Recieved data is not valid",extractedError)
+
+    throw new ApiError(422,"Recieved data is not valid",extractedError)
 }
 
 

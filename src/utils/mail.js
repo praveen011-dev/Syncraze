@@ -33,7 +33,7 @@ const SendMail=async(options)=>{
       };
 
       try {
-            await transporter.sendMail({mail})
+            await transporter.sendMail(mail)
       } catch (error) {
             console.error("Email Failed");
       }
@@ -45,7 +45,7 @@ const emailVerificationMailGenContent=(Username,VerificationUrl)=>{
             name:Username,
             intro:`Welcome to Our App! We are Very Excited To have you on board.`,
             action:{
-                instructions: 'To get started with Mailgen, please click here:',
+                instructions: 'To get started with Our App, please click here:',
                 button: {
                 color: '#22BC66', // Optional action button color
                 text: 'Verify your Email',
