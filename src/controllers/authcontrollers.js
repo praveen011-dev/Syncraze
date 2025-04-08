@@ -4,6 +4,28 @@ import {User} from "../models/user.models.js"
 import crypto from "crypto"
 import { emailVerificationMailGenContent, SendMail } from "../utils/mail.js";
 
+
+const generateAccessTokenAndRefreshToken=async(email)=>{
+
+try {
+    const user=await User.findById({email})
+  
+    const accessToken=user.generateAccessToken()
+    const refreshToken=user.generateRefreshToken()
+  
+    user.refreshToken=refreshToken
+  
+    await user.save();
+  
+    return {accessToken,refreshToken}
+} catch (error) {
+  //err will be here!
+}
+}
+
+
+
+
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, password, role } = req.body;
   const existingUser = await User.findOne({ email });
@@ -76,6 +98,23 @@ const verifyEmail = asyncHandler(async (req, res) => {
      
   });
 
+
+  const LoginUser=async(req,res)=>{
+
+    const {email,password}=req.body
+
+    const user=await User.findById({email})
+
+    if(!user){
+      res.status(400).json(new ApiResponse(400,{message:"User not found "}))
+    }
+
+    const {accessToken,refreshToken}=generateAccessTokenAndRefreshToken(user.email)
+
+    res.cookie("accessToken", accessToken);
+    res.cookie("refreshToken",refreshToken);
+
+  }
 
 
 export { registerUser,verifyEmail };

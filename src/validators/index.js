@@ -16,6 +16,12 @@ const userRegistrationValidator = () => {
       .withMessage("Username should be atleast 3 char")
       .isLength({ max: 13 })
       .withMessage("Username cannot exceed 13 char"),
+    
+    body("password")
+      .trim()
+      .notEmpty()
+      .withMessage("Password is required")
+      
   ];
 };
 
