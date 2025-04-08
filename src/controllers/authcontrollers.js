@@ -25,8 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const {hasedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
-//   console.log(token);
-  user.emailVerificationToken =hasedToken
+  user.emailVerficationToken =hasedToken
   user.emailVerficationExpiry=tokenExpiry
 
   await user.save();
@@ -49,7 +48,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const verifyEmail = asyncHandler(async (req, res) => {
     const {unHashedToken}=req.params;
-    console.log(unHashedToken);
 
     if(!unHashedToken) {
       res.status(400).json(new ApiResponse(401,{message:"Token is Missing"}))
@@ -59,19 +57,24 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
 
     const user= await User.findOne({
-      emailVerificationToken:userHashedToken
+      emailVerficationToken:userHashedToken,
+      emailVerficationExpiry:{$gt:Date.now()}
      })
 
-     if(user){
-      res.status(200).json(new ApiResponse(200,{message:"Verify Successfull"}))
+     if(!user){
+      res.status(400).json(new ApiResponse(400,{message:"Try again! not Verfied"}))
      }
 
-      return res.status(400).json(new ApiResponse(400,{message:"Try again! not Verfied"}))
+     user.isEmailVerified=true
+     user.emailVerficationToken=undefined
+     user.emailVerficationExpiry=undefined
+     
+     await user.save();
 
-      
+     res.status(200).json(new ApiResponse(200,{message:"Verify Successfull"}))
+
+     
   });
-
-
 
 
 
