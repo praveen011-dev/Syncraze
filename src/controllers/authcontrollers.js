@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import {User} from "../models/user.models.js"
 import crypto from "crypto"
 import { emailVerificationMailGenContent, SendMail } from "../utils/mail.js";
+import { ApiError } from "../utils/api.error.js";
 
 
 const generateAccessTokenAndRefreshToken=async(email)=>{
@@ -106,7 +107,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     if(!(username || email)){
       throw new ApiError(400,"username or email is required");
     }
-    
+
     const user=await User.findById({email})
 
     if(!user){
@@ -115,12 +116,25 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
     //password check by isPassword method
 
+    const passwordcheck=user.isPasswordCorrect(password)
+
+    if(!passwordcheck){
+      throw new ApiError(401,"User Creditials is incorrect")
+    }
+
+    //generate Acess token and refresh token.
+
     const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
+
+    //cokie options
 
     const options={
       httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr isliye httpOnly ka use hota h taki modification only server par ho sake . 
       secure:true
     }
+
+
+    //setting cookie
 
     return res
     .status(200)
@@ -138,4 +152,4 @@ const verifyEmail = asyncHandler(async (req, res) => {
   }
 
 
-export { registerUser,verifyEmail };
+export { registerUser,verifyEmail,LoginUser };

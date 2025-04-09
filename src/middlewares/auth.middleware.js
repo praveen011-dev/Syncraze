@@ -1,4 +1,5 @@
 import { ApiResponse } from "../utils/api.response"
+import User from "../models/user.models.js"
 
 const isLoggedIn=async(req,res,next)=>{
     const {accessToken,refreshToken}=req.cookies
@@ -9,6 +10,8 @@ const isLoggedIn=async(req,res,next)=>{
 
     const decoded= jwt.verify(accessToken,ACCESS_TOKEN_SECRET)
 
-    req.user=decoded
+    const user=User.findOne(decoded?._id)
+
+    req.user=user
     next();
 }
