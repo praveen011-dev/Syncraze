@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body,oneOf } from "express-validator";
 
 const userRegistrationValidator = () => {
   return [
@@ -26,17 +26,20 @@ const userRegistrationValidator = () => {
 };
 
 
-// const userLoginValidator=()=>{
-//   return [
-//       body('email')
-//           .isEmail().withMessage("Email is not valid"),
-//       body('password')
-//           .notEmpty().withMessage("password cannot be empty"),
-//       body('username')
+const userLoginValidator=()=>{
+  return [
+    oneOf([
+      body('email')
+        .notEmpty().withMessage('Email is required')
+        .isEmail().withMessage('Email is not valid'),
+      body('username')
+        .notEmpty().withMessage('Username is required'),
+    ], 'Either email or username must be provided'),
+      body('password')
+          .notEmpty().withMessage("password cannot be empty"),
+
+    ]
+}
 
 
-//     ]
-// }
-
-
-export {userRegistrationValidator}
+export {userRegistrationValidator,userLoginValidator}

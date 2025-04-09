@@ -9,10 +9,14 @@ import { ApiError } from "../utils/api.error.js";
 const generateAccessTokenAndRefreshToken=async(email)=>{
 
 try {
-    const user=await User.findById({email})
-  
-    const accessToken=user.generateAccessToken()
-    const refreshToken=user.generateRefreshToken()
+    const user=await User.findOne({email})
+
+    console.log(`Access and refresh token User ${user}`);
+
+    const accessToken=await user.generateAccessToken()
+    const refreshToken=await user.generateRefreshToken()
+
+    console.log(accessToken);
   
     user.refreshToken=refreshToken
   
@@ -23,8 +27,6 @@ try {
   //err will be here!
 }
 }
-
-
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -100,16 +102,15 @@ const verifyEmail = asyncHandler(async (req, res) => {
   });
 
 
-  const LoginUser=async(req,res)=>{
+const LoginUser=async(req,res)=>{
 
     const {username,email,password}=req.body
     //validate email and username or password
-    if(!(username || email)){
-      throw new ApiError(400,"username or email is required");
-    }
 
-    const user=await User.findById({email})
+    const user=await User.findOne({$or:[{username},{email}]})
 
+    console.log(user);
+    
     if(!user){
       res.status(400).json(new ApiResponse(400,{message:"User not found "}))
     }
@@ -124,7 +125,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
     //generate Acess token and refresh token.
 
-    const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
+    const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(email)
 
     //cokie options
 
@@ -150,6 +151,13 @@ const verifyEmail = asyncHandler(async (req, res) => {
       )
     )
   }
+
+
+  const refreshAccessToken = asyncHandler(async (req, res) => {
+    const { email, username, password, role } = req.body;
+  
+    //validation
+  });
 
 
 export { registerUser,verifyEmail,LoginUser };
