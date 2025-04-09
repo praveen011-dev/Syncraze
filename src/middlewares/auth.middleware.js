@@ -3,7 +3,7 @@ import { ApiResponse } from "../utils/api.response"
 const isLoggedIn=async(req,res,next)=>{
     const {accessToken,refreshToken}=req.cookies
 
-    if(!accessToken || !refreshToken){
+    if(!accessToken && !refreshToken){
         res.status(400).json(new ApiResponse(400,"AcessToken/RefreshToken is missing"));
     }
 

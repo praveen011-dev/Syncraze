@@ -26,5 +26,17 @@ const userRegistrationValidator = () => {
 };
 
 
+// const userLoginValidator=()=>{
+//   return [
+//       body('email')
+//           .isEmail().withMessage("Email is not valid"),
+//       body('password')
+//           .notEmpty().withMessage("password cannot be empty"),
+//       body('username')
+
+
+//     ]
+// }
+
 
 export {userRegistrationValidator}

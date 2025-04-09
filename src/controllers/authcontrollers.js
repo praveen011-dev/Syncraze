@@ -101,19 +101,40 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
   const LoginUser=async(req,res)=>{
 
-    const {email,password}=req.body
-
+    const {username,email,password}=req.body
+    //validate email and username or password
+    if(!(username || email)){
+      throw new ApiError(400,"username or email is required");
+    }
+    
     const user=await User.findById({email})
 
     if(!user){
       res.status(400).json(new ApiResponse(400,{message:"User not found "}))
     }
 
-    const {accessToken,refreshToken}=generateAccessTokenAndRefreshToken(user.email)
+    //password check by isPassword method
 
-    res.cookie("accessToken", accessToken);
-    res.cookie("refreshToken",refreshToken);
+    const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
 
+    const options={
+      httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr isliye httpOnly ka use hota h taki modification only server par ho sake . 
+      secure:true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user:accessToken,refreshToken // it is for if user want to save in localstorage or want to make the mobile application.
+        },
+        "User Logged In Successfully"
+      )
+    )
   }
 
 
