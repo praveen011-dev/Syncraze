@@ -113,5 +113,7 @@ userSchema.methods.generateRefreshToken= async function (){
     return {hasedToken,unHashedToken,tokenExpiry}
 }
 
-export const User =mongoose.model("User",userSchema)
+const User =mongoose.model("User",userSchema)
 
+
+export default User;
