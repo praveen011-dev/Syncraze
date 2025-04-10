@@ -15,3 +15,5 @@ const isLoggedIn=async(req,res,next)=>{
     req.user=user
     next();
 }
+
+export default isLoggedIn;

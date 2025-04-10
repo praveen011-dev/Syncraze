@@ -6,10 +6,10 @@ import { emailVerificationMailGenContent, SendMail } from "../utils/mail.js";
 import { ApiError } from "../utils/api.error.js";
 
 
-const generateAccessTokenAndRefreshToken=async(email)=>{
+const generateAccessTokenAndRefreshToken=async(id)=>{
 
 try {
-    const user=await User.findOne({email})
+    const user=await User.findById(id)
 
     console.log(`Access and refresh token User ${user}`);
 
@@ -110,7 +110,7 @@ const LoginUser=async(req,res)=>{
     const user=await User.findOne({$or:[{username},{email}]})
 
     console.log(user);
-    
+
     if(!user){
       res.status(400).json(new ApiResponse(400,{message:"User not found "}))
     }
@@ -125,7 +125,7 @@ const LoginUser=async(req,res)=>{
 
     //generate Acess token and refresh token.
 
-    const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(email)
+  const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
 
     //cokie options
 
