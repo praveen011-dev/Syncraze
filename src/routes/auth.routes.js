@@ -17,7 +17,7 @@ router.post("/forget-password",userForgetPasswordValidator(),validate,forgotPass
 
 router.post("/reset-password/:unHashedToken",userResetPasswordValidator(),validate,resetForgottenPassword)
 
-router.post("/resendemailverify",userResendEmailVerificationValidator(),validate,resendEmailVerification)
+router.post("/resendemailverify",userResendEmailVerificationValidator(),validate,isLoggedIn,resendEmailVerification)
 
 //secured Routes
 

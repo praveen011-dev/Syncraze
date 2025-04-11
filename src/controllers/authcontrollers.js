@@ -13,13 +13,8 @@ const generateAccessTokenAndRefreshToken=async(id)=>{
 try {
     const user=await User.findById(id)
 
-    console.log(`Access and refresh token User ${user}`);
-
     const accessToken=await user.generateAccessToken()
     const refreshToken=await user.generateRefreshToken()
-
-    console.log(accessToken);
-  
     user.refreshToken=refreshToken
   
     await user.save();
@@ -112,8 +107,6 @@ const LoginUser=asyncHandler(async(req,res)=>{
 
   const user=await User.findOne({$or:[{username},{email}]})
 
-  console.log(user);
-
   if(!user){
     res.status(400).json(new ApiResponse(400,{message:"User not found "}))
   }
@@ -133,7 +126,7 @@ const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._
   //cokie options
 
   const options={
-    httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr isliye httpOnly ka use hota h taki modification only server par ho sake . 
+    httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr (localStorage mei) isliye httpOnly ka use hota h taki modification only server par ho sake . 
     secure:true
   }
 
@@ -161,7 +154,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const incomeRToken=req.cookies.refreshToken || req.body.refreshToken
     
-    console.log(incomeRToken)
     if(!incomeRToken){
         throw new ApiError(401,"IncomingRToken is missing")
     }
@@ -169,12 +161,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
    try {
      const decodedRToken =jwt.verify(incomeRToken,process.env.REFRESH_TOKEN_SECRET)
 
-     console.log(decodedRToken);
- 
      const user=await User.findById(decodedRToken?._id)
 
-     console.log(user);
-   
        if(!user){
            throw new ApiError(401,"Invalid Refresh Token")
        }
@@ -247,14 +235,9 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
   const user=await User.findOne({$or:[{username},{email}]})
 
-  console.log(user);
   // create forget Password TOken
 
   const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
-
-  // console.log(hashedToken)
-  // console.log(unHashedToken)
-  // console.log(tokenExpiry)
 
   user.forgetPasswordToken =hashedToken
   user.forgetPasswordExpiry=tokenExpiry
@@ -338,26 +321,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 const resendEmailVerification = asyncHandler(async (req, res) => {
 
-  const {email}=req.body 
-
-  if(!email){
-    return new ApiError(400,"Please Enter a Valid Email");
-  }
-
-  console.log(email);
-    
-  const user= await User.findOne({
-    email:email,
-    isEmailVerified:false,
-    emailVerificationExpiry:{ $lt: new Date() }
-})
-
-  console.log(user.emailVerificationExpiry)
-
-  console.log(user);
+  const user=req.user
 
   if(!user){
-    return new ApiResponse(200, "Either your email is already verified or the token is not expired yet.");
+    return new ApiResponse(200, "Unauthorised Access");
   }
 
     
@@ -380,8 +347,12 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
       `${process.env.BASE_URL}/api/v1/users/verify/${unHashedToken}`,
     ),
   });
-});
 
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "Resend Email Successfully. Please verify your email." ));
+
+});
 
 //getCurrent User
 
