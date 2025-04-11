@@ -54,6 +54,14 @@ const userForgetPasswordValidator=()=>{
     ]
 }
 
+const userResetPasswordValidator=()=>{
+  return [
+    body('password')
+          .notEmpty().withMessage("password cannot be empty")
+
+    ]
+}
 
 
-export {userRegistrationValidator,userLoginValidator,userForgetPasswordValidator}
+
+export {userRegistrationValidator,userLoginValidator,userForgetPasswordValidator,userResetPasswordValidator}

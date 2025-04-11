@@ -266,7 +266,7 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     subject: "Forget Password Request",
     mailGenContent: forgetPasswordMailGenContent(
       user.username,
-      `${process.env.BASE_URL}/api/v1/users/forget-password/${unHashedToken}`,
+      `${process.env.BASE_URL}/api/v1/users/reset-password/${unHashedToken}`,
     ),
   });
 
@@ -278,6 +278,39 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 });
 
 
+//Reset forgotten Password
+
+const resetForgottenPassword = asyncHandler(async (req, res) => {
+
+  const {unHashedToken} =req.params
+  const {password}=req.body
+
+  if(!unHashedToken) {
+    res.status(400).json(new ApiError(401,{message:"Token is Missing"}))
+  } 
+
+  const userHashedToken=crypto.createHash("sha256").update(unHashedToken).digest("hex")
+
+
+  const user= await User.findOne({
+    forgetPasswordToken:userHashedToken,
+    forgetPasswordExpiry:{$gt:Date.now()}
+   })
+   
+
+   if(!user){
+    res.status(400).json(new ApiError(400,{message:"Try again! User not Found"}))
+   }
+
+   user.password=password
+
+   await user.save();
+
+   return res
+   .json(new ApiResponse(200,"Password Reset Successfull"));
+
+  //validation
+});
 
 
 //getCurrent User
@@ -296,4 +329,4 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 
 
-export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest};
+export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword};
