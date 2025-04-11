@@ -41,5 +41,21 @@ const userLoginValidator=()=>{
     ]
 }
 
+const userForgetPasswordValidator=()=>{
+  return [
+    oneOf([
+      body('email')
+        .notEmpty().withMessage('Email is required')
+        .isEmail().withMessage('Email is not valid'),
+      body('username')
+        .notEmpty().withMessage('Username is required'),
+    ], 'Either email or username must be provided'),
+      body('password')
+          .notEmpty().withMessage("password cannot be empty"),
 
-export {userRegistrationValidator,userLoginValidator}
+    ]
+}
+
+
+
+export {userRegistrationValidator,userLoginValidator,userForgetPasswordValidator}

@@ -29,7 +29,7 @@ try {
 }
 }
 
-
+//Register User
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, password, role } = req.body;
   const existingUser = await User.findOne({ email });
@@ -49,9 +49,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // create verification token
 
-  const {hasedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
+  const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
-  user.emailVerficationToken =hasedToken
+  user.emailVerficationToken =hashedToken
   user.emailVerficationExpiry=tokenExpiry
 
   await user.save();
@@ -72,6 +72,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, { message: "User registered. Please verify your email." }));
 });
 
+//Verify Email
 const verifyEmail = asyncHandler(async (req, res) => {
     const {unHashedToken}=req.params;
 
@@ -102,57 +103,59 @@ const verifyEmail = asyncHandler(async (req, res) => {
      
   });
 
-const LoginUser=async(req,res)=>{
+//LoginUser
+const LoginUser=asyncHandler(async(req,res)=>{
 
-    const {username,email,password}=req.body
-    //validate email and username or password
+  const {username,email,password}=req.body
+  //validate email and username or password
 
-    const user=await User.findOne({$or:[{username},{email}]})
+  const user=await User.findOne({$or:[{username},{email}]})
 
-    console.log(user);
+  console.log(user);
 
-    if(!user){
-      res.status(400).json(new ApiResponse(400,{message:"User not found "}))
-    }
+  if(!user){
+    res.status(400).json(new ApiResponse(400,{message:"User not found "}))
+  }
 
-    //password check by isPassword method
+  //password check by isPassword method
 
-    const passwordcheck=user.isPasswordCorrect(password)
+  const passwordcheck=user.isPasswordCorrect(password)
 
-    if(!passwordcheck){
-      throw new ApiError(401,"User Creditials is incorrect")
-    }
+  if(!passwordcheck){
+    throw new ApiError(401,"User Creditials is incorrect")
+  }
 
-    //generate Acess token and refresh token.
+  //generate Acess token and refresh token.
 
-  const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
+const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
 
-    //cokie options
+  //cokie options
 
-    const options={
-      httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr isliye httpOnly ka use hota h taki modification only server par ho sake . 
-      secure:true
-    }
-
-
-    //setting cookie
-
-    return res
-    .status(200)
-    .cookie("accessToken", accessToken,options)
-    .cookie("refreshToken",refreshToken,options)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user:accessToken,refreshToken // it is for if user want to save in localstorage or want to make the mobile application.
-        },
-        "User Logged In Successfully"
-      )
-    )
+  const options={
+    httpOnly:true, // by default koi bhi modify kar sakta h cookie ko frontend pr isliye httpOnly ka use hota h taki modification only server par ho sake . 
+    secure:true
   }
 
 
+  //setting cookie
+
+  return res
+  .status(200)
+  .cookie("accessToken", accessToken,options)
+  .cookie("refreshToken",refreshToken,options)
+  .json(
+    new ApiResponse(
+      200,
+      {
+        user:accessToken,refreshToken // it is for if user want to save in localstorage or want to make the mobile application.
+      },
+      "User Logged In Successfully"
+    )
+  )
+}
+)
+
+//Refresh-AccessToken
 const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const incomeRToken=req.cookies.refreshToken || req.body.refreshToken
@@ -208,6 +211,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   });
 
+//Logout User
 
   const logoutUser = asyncHandler(async (req, res) => {
       await User.findByIdAndUpdate(req.user._id,
@@ -234,4 +238,56 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       )
     //validation
   });
-export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser};
+
+
+//Forget Password
+
+const forgotPasswordRequest = asyncHandler(async (req, res) => {
+  const { email, username} = req.body;
+
+  const user=await User.findOne({$or:[{username},{email}]})
+
+
+  // create forget Password TOken
+
+  const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
+
+  user.forgetPasswordToken =hashedToken
+  user.forgetPasswordExpiry=tokenExpiry
+
+
+  await SendMail({
+    email: user.email,
+    subject: "Forget Password Request",
+    mailGenContent: forgetPasswordMailGenContent(
+      user.username,
+      `${process.env.BASE_URL}/api/v1/users/forget-password/${unHashedToken}`,
+    ),
+  });
+
+
+  //validation
+});
+
+
+
+
+
+
+//getCurrent User
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  
+  const user=await User.findById(req.user._id).select("-password -refreshToken");
+  
+  return res
+  .json(
+    new ApiResponse(200,user,"User Profile fetched Successfully"
+    )
+  )
+});
+
+
+
+
+export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest};
