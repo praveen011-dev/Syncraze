@@ -239,7 +239,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     //validation
   });
 
-
 //Forget Password
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
@@ -315,6 +314,52 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 });
 
 
+//Resend Email Verification 
+
+const resendEmailVerification = asyncHandler(async (req, res) => {
+
+  const {email}=req.body 
+
+  if(!email){
+    return new ApiError(401,"User not found Try Again!");
+  }
+    
+  const user= await User.findOne({
+    email,
+    emailVerificationExpiry: { $lt: new Date() },
+    isEmailVerified:false
+  })
+
+  console.log(user);
+
+  if(!user){
+    return new ApiResponse(201,"Your Email is Verified!");
+  }
+
+    
+  // create resend verification token
+
+ 
+  const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
+
+  user.emailVerficationToken =hashedToken
+  user.emailVerficationExpiry=tokenExpiry
+
+  await user.save();
+
+  // send verification email
+  
+  await SendMail({
+    email: user.email,
+    subject: "Verify Your Email",
+    mailGenContent: emailVerificationMailGenContent(
+      user.username,
+      `${process.env.BASE_URL}/api/v1/users/verify/${unHashedToken}`,
+    ),
+  });
+});
+
+
 //getCurrent User
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -329,4 +374,4 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 
-export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword};
+export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword,resendEmailVerification};

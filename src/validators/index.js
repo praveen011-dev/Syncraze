@@ -62,6 +62,14 @@ const userResetPasswordValidator=()=>{
     ]
 }
 
+const userResendEmailVerificationValidator=()=>{
+  return [
+    body('email')
+          .isEmail().withMessage("Enter a valid email")
+          .notEmpty().withMessage("email is required")
+
+    ]
+}
 
 
-export {userRegistrationValidator,userLoginValidator,userForgetPasswordValidator,userResetPasswordValidator}
+export {userRegistrationValidator,userLoginValidator,userForgetPasswordValidator,userResetPasswordValidator,userResendEmailVerificationValidator}

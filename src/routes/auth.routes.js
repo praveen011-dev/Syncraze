@@ -1,7 +1,7 @@
 import {Router} from "express";
-import { forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
+import { forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
 import { validate } from "../middlewares/validator.middleware.js";
-import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator } from "../validators/index.js";
+import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/index.js";
 import isLoggedIn from "../middlewares/auth.middleware.js";
 const router=Router()
 
@@ -16,6 +16,8 @@ router.get("/login",userLoginValidator(),validate,LoginUser)
 router.get("/forget-password",userForgetPasswordValidator(),validate,forgotPasswordRequest)
 
 router.get("/reset-password/:unHashedToken",userResetPasswordValidator(),validate,resetForgottenPassword)
+
+router.get("/resendemailverify",userResendEmailVerificationValidator(),validate,resendEmailVerification)
 
 //secured Routes
 
