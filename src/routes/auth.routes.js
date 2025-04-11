@@ -13,7 +13,7 @@ router.get("/verify/:unHashedToken",verifyEmail)
 
 router.get("/login",userLoginValidator(),validate,LoginUser)
 
-router.get("/forget-password/:unHashedToken",userForgetPasswordValidator(),validate,forgotPasswordRequest)
+router.get("/forget-password",userForgetPasswordValidator(),validate,forgotPasswordRequest)
 
 
 //secured Routes

@@ -2,7 +2,7 @@ import { ApiResponse } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import User from "../models/user.models.js"
 import crypto from "crypto"
-import { emailVerificationMailGenContent, SendMail } from "../utils/mail.js";
+import { emailVerificationMailGenContent,forgetPasswordMailGenContent, SendMail } from "../utils/mail.js";
 import { ApiError } from "../utils/api.error.js";
 import jwt from "jsonwebtoken"
 
@@ -247,14 +247,19 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
   const user=await User.findOne({$or:[{username},{email}]})
 
-
+  console.log(user);
   // create forget Password TOken
 
   const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
+  // console.log(hashedToken)
+  // console.log(unHashedToken)
+  // console.log(tokenExpiry)
+
   user.forgetPasswordToken =hashedToken
   user.forgetPasswordExpiry=tokenExpiry
 
+  await user.save();
 
   await SendMail({
     email: user.email,
@@ -265,11 +270,12 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     ),
   });
 
+  return res
+    .status(201)
+    .json(new ApiResponse(201, { message: "Please Check your email. password forget link has been sent to your email" }));
 
   //validation
 });
-
-
 
 
 
