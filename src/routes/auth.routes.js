@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
+import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
 import { validate } from "../middlewares/validator.middleware.js";
 import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/index.js";
 import isLoggedIn from "../middlewares/auth.middleware.js";
@@ -24,6 +24,8 @@ router.get("/resendemailverify",userResendEmailVerificationValidator(),validate,
 router.get("/logout",isLoggedIn,logoutUser)
 router.get("/refresh-accessToken",refreshAccessToken) //generate new AT&RT
 router.get("/get-profile",isLoggedIn,getCurrentUser)
+router.get("/change-password",isLoggedIn,changeCurrentPassword) 
+
 
 
 

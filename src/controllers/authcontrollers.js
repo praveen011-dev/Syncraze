@@ -51,8 +51,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
-  user.emailVerficationToken =hashedToken
-  user.emailVerficationExpiry=tokenExpiry
+  user.emailVerificationToken =hashedToken
+  user.emailVerificationExpiry=tokenExpiry
 
   await user.save();
 
@@ -282,7 +282,7 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 const resetForgottenPassword = asyncHandler(async (req, res) => {
 
   const {unHashedToken} =req.params
-  const {password}=req.body
+  const {password :newPassword}=req.body
 
   if(!unHashedToken) {
     res.status(400).json(new ApiError(401,{message:"Token is Missing"}))
@@ -301,7 +301,7 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
     res.status(400).json(new ApiError(400,{message:"Try again! User not Found"}))
    }
 
-   user.password=password
+   user.password=newPassword
    user.forgetPasswordToken=undefined
    user.forgetPasswordExpiry=undefined
 
@@ -314,6 +314,26 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 });
 
 
+// ChangeCurrentPassword
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+   const {email,password:newPassword}=req.body
+
+   const user= await User.findOne({email})
+
+   if(!user){
+    res.status(400).json(new ApiError(400,{message:"Try again! User not Found"}))
+   }
+
+   user.password=newPassword
+
+   await user.save();
+
+   return res
+   .json(new ApiResponse(200,"Password Modify successfull"));
+
+});
+
 //Resend Email Verification 
 
 const resendEmailVerification = asyncHandler(async (req, res) => {
@@ -321,25 +341,28 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
   const {email}=req.body 
 
   if(!email){
-    return new ApiError(401,"User not found Try Again!");
+    return new ApiError(400,"Please Enter a Valid Email");
   }
+
+  console.log(email);
     
   const user= await User.findOne({
-    email,
-    emailVerificationExpiry: { $lt: new Date() },
-    isEmailVerified:false
-  })
+    email:email,
+    isEmailVerified:false,
+    emailVerificationExpiry:{ $lt: new Date() }
+})
+
+  console.log(user.emailVerificationExpiry)
 
   console.log(user);
 
   if(!user){
-    return new ApiResponse(201,"Your Email is Verified!");
+    return new ApiResponse(200, "Either your email is already verified or the token is not expired yet.");
   }
 
     
   // create resend verification token
 
- 
   const {hashedToken,unHashedToken,tokenExpiry}= user.generateTemporaryToken();
 
   user.emailVerficationToken =hashedToken
@@ -374,4 +397,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 
-export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword,resendEmailVerification};
+
+
+export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword,resendEmailVerification,changeCurrentPassword};

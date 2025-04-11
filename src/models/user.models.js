@@ -54,10 +54,10 @@ const userSchema= new Schema({
     refreshToken:{
         type:String,
     },
-    emailVerficationToken:{
+    emailVerificationToken:{
         type:String,
     },
-    emailVerficationExpiry:{
+    emailVerificationExpiry:{
         type:Date,
     },
 
@@ -108,7 +108,7 @@ userSchema.methods.generateRefreshToken= async function (){
  userSchema.methods.generateTemporaryToken=function(){
     const unHashedToken= crypto.randomBytes(20).toString("hex");
     const hashedToken=crypto.createHash("sha256").update(unHashedToken).digest("hex")
-    const tokenExpiry=Date.now()+(20*60*1000)//20 min
+    const tokenExpiry=new Date(Date.now() + 20 * 60 * 1000);
     
     return {hashedToken,unHashedToken,tokenExpiry}
 }
