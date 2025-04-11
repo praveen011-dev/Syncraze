@@ -7,6 +7,7 @@ import { ApiError } from "../utils/api.error.js";
 import jwt from "jsonwebtoken"
 
 
+//Generate Access And Refresh Token
 const generateAccessTokenAndRefreshToken=async(id)=>{
 
 try {
