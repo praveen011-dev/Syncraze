@@ -303,6 +303,8 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
    }
 
    user.password=password
+   user.forgetPasswordToken=undefined
+   user.forgetPasswordExpiry=undefined
 
    await user.save();
 
@@ -325,8 +327,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     )
   )
 });
-
-
 
 
 export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword};
