@@ -317,9 +317,8 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 // ChangeCurrentPassword
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-   const {email,password:newPassword}=req.body
-
-   const user= await User.findOne({email})
+    const user=req.user
+    const {password:newPassword}=req.body
 
    if(!user){
     res.status(400).json(new ApiError(400,{message:"Try again! User not Found"}))

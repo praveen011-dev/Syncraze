@@ -11,20 +11,20 @@ router.route("/register")
 
 router.get("/verify/:unHashedToken",verifyEmail)
 
-router.get("/login",userLoginValidator(),validate,LoginUser)
+router.post("/login",userLoginValidator(),validate,LoginUser)
 
-router.get("/forget-password",userForgetPasswordValidator(),validate,forgotPasswordRequest)
+router.post("/forget-password",userForgetPasswordValidator(),validate,forgotPasswordRequest)
 
-router.get("/reset-password/:unHashedToken",userResetPasswordValidator(),validate,resetForgottenPassword)
+router.post("/reset-password/:unHashedToken",userResetPasswordValidator(),validate,resetForgottenPassword)
 
-router.get("/resendemailverify",userResendEmailVerificationValidator(),validate,resendEmailVerification)
+router.post("/resendemailverify",userResendEmailVerificationValidator(),validate,resendEmailVerification)
 
 //secured Routes
 
-router.get("/logout",isLoggedIn,logoutUser)
+router.post("/logout",isLoggedIn,logoutUser)
 router.get("/refresh-accessToken",refreshAccessToken) //generate new AT&RT
 router.get("/get-profile",isLoggedIn,getCurrentUser)
-router.get("/change-password",isLoggedIn,changeCurrentPassword) 
+router.post("/change-password",isLoggedIn,changeCurrentPassword) 
 
 
 
