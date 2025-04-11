@@ -396,4 +396,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   )
 });
 
-export { registerUser,verifyEmail,LoginUser ,refreshAccessToken,logoutUser,getCurrentUser,forgotPasswordRequest,resetForgottenPassword,resendEmailVerification,changeCurrentPassword};
+export { 
+  registerUser,
+  verifyEmail,
+  LoginUser,
+  refreshAccessToken,
+  logoutUser,
+  getCurrentUser,
+  forgotPasswordRequest,
+  resetForgottenPassword,
+  resendEmailVerification,
+  changeCurrentPassword
+};
