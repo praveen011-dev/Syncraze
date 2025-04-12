@@ -9,7 +9,6 @@ const projectSchema= new Schema({
 
     description:{
         type:String,
-        required:true,
 
     },
     createdBy:{

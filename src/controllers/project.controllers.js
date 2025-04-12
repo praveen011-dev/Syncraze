@@ -1,5 +1,6 @@
-import { Project } from "../models/project.models";
-import { ApiError } from "../utils/api.error";
+import { Project } from "../models/project.models.js";
+import { ApiError } from "../utils/api.error.js";
+import { ApiResponse } from "../utils/api.response.js";
 
 
 const getProjects = async (req, res) => {
@@ -30,17 +31,24 @@ const getProjects = async (req, res) => {
         .json(new ApiError(400, { message: "Please enter Project name" }));
     }
 
-    const project =Project.create({
+    const project =await Project.create({
         name,
         description,
         createdBy:req.user._id
     })
 
+    await project.save();
+    
+    return res
+    .status(200)
+    .json(new ApiResponse(200,`Project Created Successfully by: ${req.user.email}`))
     
   };
   
   const updateProject = async (req, res) => {
     // update project
+
+
   };
   
   const deleteProject = async (req, res) => {

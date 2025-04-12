@@ -1,10 +1,10 @@
 import {Router} from "express";
-import { createProject, getProjects } from "../controllers/project.controllers";
-import isLoggedIn from "../middlewares/auth.middleware";
+import { createProject, getProjects } from "../controllers/project.controllers.js";
+import isLoggedIn from "../middlewares/auth.middleware.js";
 
 const router=Router()
 
-router.get("/createproject",isLoggedIn,createProject)
+router.post("/createproject",isLoggedIn,createProject)
 
 
 
