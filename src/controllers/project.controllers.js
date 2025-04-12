@@ -1,8 +1,10 @@
 import { Project } from "../models/project.models.js";
 import { ProjectMember } from "../models/projectmember.models.js";
+import User from "../models/user.models.js";
 import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
 import {asyncHandler} from '../utils/async-handler.js'
+import { AvailableUserRoles, UserRolesEnum } from "../utils/constants.js";
 
 
 const getProjects = asyncHandler(async (req, res) => {
@@ -20,10 +22,24 @@ const getProjects = asyncHandler(async (req, res) => {
 })
   
 const getProjectById = async (req, res) => {
-    // get project by id
-  };
+
+    const {project_id}=req.params
+
+    const project=await Project.findById(project_id)
+
+    if(!project || !project.createdBy==req.user._id){
+        return res
+        .status(400)
+        .json(new ApiResponse(400, "Either you are not eligible to get Project or Project not found!"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,project,"Project Found Successfully"))
+
+};
   
-  const createProject = asyncHandler(async (req, res) => {
+const createProject = asyncHandler(async (req, res) => {
     // create project
     const user=req.user
 
@@ -49,7 +65,13 @@ const getProjectById = async (req, res) => {
         createdBy:req.user._id
     })
 
-    await project.save();
+    if(project){
+        await ProjectMember.create({
+            user:req.user._id,
+            project:project._id,
+            role:UserRolesEnum.ADMIN
+        })
+    }
     
     return res
     .status(200)
@@ -58,7 +80,8 @@ const getProjectById = async (req, res) => {
   }
 )
   
-  const updateProject = asyncHandler(async (req, res) => {
+const updateProject = asyncHandler(async (req, res) => {
+
     // update project
     const user=req.user
 
@@ -95,7 +118,7 @@ const getProjectById = async (req, res) => {
 
   })
   
-  const deleteProject = asyncHandler(async (req, res) => {
+const deleteProject = asyncHandler(async (req, res) => {
     const user=req.user
 
     const {project_id}=req.params
@@ -103,16 +126,22 @@ const getProjectById = async (req, res) => {
     if(!project_id){
         return res
         .status(400)
-        .json(new ApiResponse(400,"Project not found"))
+        .json(new ApiResponse(400,"Project id Missing"))
     }
 
-    const project=await Project.findByIdAndDelete({_id:project_id,createdBy:req.user._id})
+
+    const project=await Project.findOneAndDelete({_id:project_id,createdBy:req.user._id})
+
+    await ProjectMember.findOneAndDelete({_id:project_id,createdBy:req.user._id})
+
+    console.log(project);
 
     if(!project){
         return res
         .status(400)
         .json(new ApiResponse(400,"Either you are not eligible to delete Project or Project not found!"));
     }
+
 
     return res
     .status(200)
@@ -122,19 +151,58 @@ const getProjectById = async (req, res) => {
   }
 )
   
-  const getProjectMembers = async (req, res) => {
+const getProjectMembers= async (req, res) => {
     // get project members
+
   };
   
-  const addMemberToProject = async (req, res) => {
+const addMemberToProject = asyncHandler(async (req, res) => {
     // add member to project
-  };
+    
+    const {project_id}=req.params
+    const {useremail,role}=req.body
+
+    const inputUser=await User.findOne({email:useremail})
+
+    if(!inputUser){
+        return res
+        .status(400)
+        .json(new ApiResponse(400,"User not found"))
+    }
+
+    const checkUserRole= await ProjectMember.findOne({role:"admin",project:project_id})
+
+    if(checkUserRole){
+
+        await ProjectMember.create({
+            user:inputUser._id,
+            project:project_id,
+            role:role
+        })
+    }
+   
+     return res
+    .status(200)
+    .json(new ApiResponse(200,"Project Member Added Successfully"));
+    
+})
   
-  const deleteMember = async (req, res) => {
+const deleteMember = async (req, res) => {
     // delete member from project
+    const {project_id,member_id}=req.params
+
+
+    const checkUserRole= await ProjectMember.findOne({role:"admin"})
+
+    if(checkUserRole){
+        await ProjectMember.findOneAndDelete({
+            user:member_id,
+        })
+    }
+
   };
   
-  const updateMemberRole = async (req, res) => {
+const updateMemberRole = async (req, res) => {
     // update member role
   };
   
