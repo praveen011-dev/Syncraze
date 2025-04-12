@@ -1,6 +1,8 @@
 import { Project } from "../models/project.models.js";
+import { ProjectMember } from "../models/projectmember.models.js";
 import { ApiError } from "../utils/api.error.js";
 import { ApiResponse } from "../utils/api.response.js";
+import {asyncHandler} from '../utils/async-handler.js'
 
 
 const getProjects = async (req, res) => {
@@ -31,6 +33,14 @@ const getProjects = async (req, res) => {
         .json(new ApiError(400, { message: "Please enter Project name" }));
     }
 
+    const projectExist=await Project.findOne({name})
+
+    if(projectExist){
+         return res
+         .status(400)
+         .json(new ApiResponse(400, "Project name already exist choose different" ));
+    }
+
     const project =await Project.create({
         name,
         description,
@@ -45,11 +55,51 @@ const getProjects = async (req, res) => {
     
   };
   
-  const updateProject = async (req, res) => {
+  const updateProject = asyncHandler(async (req, res) => {
     // update project
+    const user=req.user
+
+    if(!user){
+        return res
+        .status(400)
+        .json(new ApiError(400,"User not Found"))
+    }
+
+    const {project_id}=req.params
+    const {name:Newname,description:Newdescription}=req.body
+
+    const projectExist=await Project.findOne({name:Newname})
+
+    if(projectExist){
+         return res
+         .status(400)
+         .json(new ApiResponse(400,"Project name already exist choose different" ));
+    }
+
+    const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
+
+    if(project){
+
+        project.name=Newname
+        project.description=Newdescription
+    
+        await project.save();
+    
+        return res
+        .status(200)
+        .json(new ApiResponse(200,"Project Update Sucessfully"));
+    }
+
+    else{
+        return res
+        .status(400)
+        .json(new ApiResponse(400,"Permision Denied!"));
+    }
+
+   
 
 
-  };
+  })
   
   const deleteProject = async (req, res) => {
     // delete project

@@ -12,6 +12,7 @@ import projectroutes from "./routes/project.routes.js"
 
 app.use(cookieParser());
 app.use(express.json()); // <== This must be above any route handlers
+
 app.use("/api/v1/healthcheck",healthCheckRouter);
 app.use("/api/v1/users", authroutes);
 app.use("/api/v1/projects", projectroutes);
