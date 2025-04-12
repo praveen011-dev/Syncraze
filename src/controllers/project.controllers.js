@@ -5,13 +5,21 @@ import { ApiResponse } from "../utils/api.response.js";
 import {asyncHandler} from '../utils/async-handler.js'
 
 
-const getProjects = async (req, res) => {
-    // get all projects
+const getProjects = asyncHandler(async (req, res) => {
+    const allprojects= await Project.find({createdBy:req.user._id})
 
+    if(!allprojects){
+        return res
+        .status(400)
+        .json(new ApiResponse(400, "No Projects Found in this Account"));
+    }
 
-  };
+    return res
+    .status(200)
+    .json(new ApiResponse(200,allprojects,"Your Projects",))
+})
   
-  const getProjectById = async (req, res) => {
+const getProjectById = async (req, res) => {
     // get project by id
   };
   
