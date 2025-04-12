@@ -8,7 +8,7 @@ import {asyncHandler} from '../utils/async-handler.js'
 const getProjects = asyncHandler(async (req, res) => {
     const allprojects= await Project.find({createdBy:req.user._id})
 
-    if(!allprojects){
+    if(!allprojects || allprojects.length === 0){
         return res
         .status(400)
         .json(new ApiResponse(400, "No Projects Found in this Account"));
