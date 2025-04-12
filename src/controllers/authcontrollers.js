@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existingUser) {
     return res
       .status(409)
-      .json(new ApiResponse(409, { message: "User already exists" }));
+      .json(new ApiError(400, { message: "User already exists" }));
   }
 
   const user = await User.create({

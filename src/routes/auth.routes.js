@@ -1,9 +1,15 @@
 import {Router} from "express";
-import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
-import { validate } from "../middlewares/validator.middleware.js";
-import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/index.js";
-import isLoggedIn from "../middlewares/auth.middleware.js";
 const router=Router()
+
+
+
+import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
+
+import { validate } from "../middlewares/validator.middleware.js";
+
+import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/index.js";
+
+import isLoggedIn from "../middlewares/auth.middleware.js";
 
 
 router.route("/register")
