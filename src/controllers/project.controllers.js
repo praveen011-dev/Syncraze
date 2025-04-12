@@ -15,15 +15,9 @@ const getProjects = async (req, res) => {
     // get project by id
   };
   
-  const createProject = async (req, res) => {
+  const createProject = asyncHandler(async (req, res) => {
     // create project
     const user=req.user
-
-    if(!user){
-        return res
-        .status(400)
-        .json(new ApiError(400,"User not Found"))
-    }
 
     const {name,description}=req.body
 
@@ -53,17 +47,12 @@ const getProjects = async (req, res) => {
     .status(200)
     .json(new ApiResponse(200,`Project Created Successfully by: ${req.user.email}`))
     
-  };
+  }
+)
   
   const updateProject = asyncHandler(async (req, res) => {
     // update project
     const user=req.user
-
-    if(!user){
-        return res
-        .status(400)
-        .json(new ApiError(400,"User not Found"))
-    }
 
     const {project_id}=req.params
     const {name:Newname,description:Newdescription}=req.body
@@ -93,17 +82,37 @@ const getProjects = async (req, res) => {
     else{
         return res
         .status(400)
-        .json(new ApiResponse(400,"Permision Denied!"));
+        .json(new ApiResponse(400,"Either you are not eligible to update Project or Project not found!"));
     }
-
-   
-
 
   })
   
-  const deleteProject = async (req, res) => {
-    // delete project
-  };
+  const deleteProject = asyncHandler(async (req, res) => {
+    const user=req.user
+
+    const {project_id}=req.params
+
+    if(!project_id){
+        return res
+        .status(400)
+        .json(new ApiResponse(400,"Project not found"))
+    }
+
+    const project=await Project.findByIdAndDelete({_id:project_id,createdBy:req.user._id})
+
+    if(!project){
+        return res
+        .status(400)
+        .json(new ApiResponse(400,"Either you are not eligible to delete Project or Project not found!"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,"Project Delete Successfully"))
+
+
+  }
+)
   
   const getProjectMembers = async (req, res) => {
     // get project members
