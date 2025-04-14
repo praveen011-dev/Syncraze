@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { addMemberToProject, createProject, deleteProject, getProjectById, getProjects, updateProject } from "../controllers/project.controllers.js";
+import { addMemberToProject, createProject, deleteMember, deleteProject, getProjectById, getProjects, updateProject } from "../controllers/project.controllers.js";
 import isLoggedIn from "../middlewares/auth.middleware.js";
 
 const router=Router()
@@ -12,11 +12,17 @@ router.route("/getProject/:project_id")
 .get(isLoggedIn,getProjectById)
 .post(isLoggedIn,addMemberToProject)
 
-router.get("/getProjects",isLoggedIn,getProjects)
+router.route("/getProjects")
+.get(isLoggedIn,getProjects)
 
 //Project Members Routes
 
-// router.post("/addMemberToProject/project-",isLoggedIn,addMemberToProject)
+router.route("/addMemberToProject/:project_id")
+.post(isLoggedIn,addMemberToProject)
+
+
+router.route("/deleteMember/:project_id/user/:member_id")
+.delete(isLoggedIn,deleteMember)
 
 
 

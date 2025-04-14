@@ -25,9 +25,9 @@ const getProjectById = async (req, res) => {
 
     const {project_id}=req.params
 
-    const project=await Project.findById(project_id)
+    const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
 
-    if(!project || !project.createdBy==req.user._id){
+    if(!project){
         return res
         .status(400)
         .json(new ApiResponse(400, "Either you are not eligible to get Project or Project not found!"));
@@ -98,6 +98,7 @@ const updateProject = asyncHandler(async (req, res) => {
 
     const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
 
+
     if(project){
 
         project.name=Newname
@@ -132,7 +133,7 @@ const deleteProject = asyncHandler(async (req, res) => {
 
     const project=await Project.findOneAndDelete({_id:project_id,createdBy:req.user._id})
 
-    await ProjectMember.findOneAndDelete({_id:project_id,createdBy:req.user._id})
+    await ProjectMember.findOneAndDelete({project:project_id,user:req.user._id})
 
     console.log(project);
 
@@ -174,6 +175,14 @@ const addMemberToProject = asyncHandler(async (req, res) => {
 
     if(checkUserRole){
 
+       const existMember=await ProjectMember.findOne({user:inputUser._id})
+    
+       if(existMember){
+            return res
+            .status(200)
+            .json(new ApiResponse(200,"Member Already Exist"));
+       }
+       
         await ProjectMember.create({
             user:inputUser._id,
             project:project_id,
@@ -191,14 +200,19 @@ const deleteMember = async (req, res) => {
     // delete member from project
     const {project_id,member_id}=req.params
 
-
     const checkUserRole= await ProjectMember.findOne({role:"admin"})
 
     if(checkUserRole){
-        await ProjectMember.findOneAndDelete({
-            user:member_id,
+        await ProjectMember.deleteOne({
+            _id:member_id,
+            project:project_id,
+            role:"member" || "project_admin"
         })
     }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,"Member Delete Sucessfully"));
 
   };
   
