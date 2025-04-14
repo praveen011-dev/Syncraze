@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { addMemberToProject, createProject, deleteMember, deleteProject, getProjectById, getProjects, updateProject } from "../controllers/project.controllers.js";
+import { addMemberToProject, createProject, deleteMember, deleteProject, getProjectById, getProjectMembers, getProjects, updateMemberRole, updateProject } from "../controllers/project.controllers.js";
 import isLoggedIn from "../middlewares/auth.middleware.js";
 
 const router=Router()
@@ -21,9 +21,13 @@ router.route("/addMemberToProject/:project_id")
 .post(isLoggedIn,addMemberToProject)
 
 
-router.route("/deleteMember/:project_id/user/:member_id")
+router.route("/deleteMember/:project_id/memberid/:member_id")
 .delete(isLoggedIn,deleteMember)
 
+router.route("/allprojectMembers/:project_id")
+.get(isLoggedIn,getProjectMembers)
 
+router.route("/updateMember/:project_id/memberid/:member_id")
+.post(isLoggedIn,updateMemberRole)
 
 export default router

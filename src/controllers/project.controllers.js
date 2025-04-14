@@ -21,7 +21,7 @@ const getProjects = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200,allprojects,"Your Projects",))
 })
   
-const getProjectById = async (req, res) => {
+const getProjectById = asyncHandler(async (req, res) => {
 
     const {project_id}=req.params
 
@@ -37,7 +37,7 @@ const getProjectById = async (req, res) => {
     .status(200)
     .json(new ApiResponse(200,project,"Project Found Successfully"))
 
-};
+})
   
 const createProject = asyncHandler(async (req, res) => {
     // create project
@@ -96,26 +96,22 @@ const updateProject = asyncHandler(async (req, res) => {
          .json(new ApiResponse(400,"Project name already exist choose different" ));
     }
 
-    const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
+    const project=await Project.findOneAndUpdate({_id:project_id,createdBy:req.user._id},{
+        name:Newname,
+        description:Newdescription
+    })
 
+    if(!project){
 
-    if(project){
-
-        project.name=Newname
-        project.description=Newdescription
-    
-        await project.save();
-    
-        return res
-        .status(200)
-        .json(new ApiResponse(200,"Project Update Sucessfully"));
-    }
-
-    else{
         return res
         .status(400)
         .json(new ApiResponse(400,"Either you are not eligible to update Project or Project not found!"));
+
     }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,"Project Update Sucessfully"));
 
   })
   
@@ -152,10 +148,22 @@ const deleteProject = asyncHandler(async (req, res) => {
   }
 )
   
-const getProjectMembers= async (req, res) => {
-    // get project members
+const getProjectMembers= asyncHandler(async (req, res) => {
 
-  };
+    const {project_id}=req.params
+
+    const allprojectMembers= await ProjectMember.find({project:project_id})
+
+    if(!allprojectMembers || allprojectMembers.length === 0){
+        return res
+        .status(400)
+        .json(new ApiResponse(400, "No ProjectMembers Found in this Project"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,allprojectMembers,"All Members",))
+  })
   
 const addMemberToProject = asyncHandler(async (req, res) => {
     // add member to project
@@ -168,7 +176,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     if(!inputUser){
         return res
         .status(400)
-        .json(new ApiResponse(400,"User not found"))
+        .json(new ApiResponse(400,"User not found please Signup! "))
     }
 
     const checkUserRole= await ProjectMember.findOne({role:"admin",project:project_id})
@@ -196,7 +204,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     
 })
   
-const deleteMember = async (req, res) => {
+const deleteMember = asyncHandler(async (req, res) => {
     // delete member from project
     const {project_id,member_id}=req.params
 
@@ -212,22 +220,44 @@ const deleteMember = async (req, res) => {
         if(!ismemberExist){
             return res
             .status(400)
-            .json(new ApiResponse(400,"Member not found !"))
+            .json(new ApiResponse(400,"Either Member not found or Admin can't Delete yourSelf !"))
         }
-        
+
         return res
         .status(200)
         .json(new ApiResponse(200,"Member Delete Sucessfully"));
 
     }
-
-   
-
-  };
+  })
   
-const updateMemberRole = async (req, res) => {
-    // update member role
-  };
+const updateMemberRole = asyncHandler(async (req, res) => {
+    const {project_id,member_id}=req.params
+
+    const {role}=req.body
+
+    const checkUserRole= await ProjectMember.findOne({role:"admin"})
+
+    if(checkUserRole){
+        const ismemberExist= await ProjectMember.findOneAndUpdate({
+            _id:member_id,
+            project:project_id,
+            $or:[{"role":"project_admin"},  {"role":"member"}]
+        },{role:role})
+
+        if(!ismemberExist){
+            return res
+            .status(400)
+            .json(new ApiResponse(400,"Member not found!"))
+        }
+
+        return res
+        .status(200)
+        .json(new ApiResponse(200,"Member Update Sucessfully"));
+
+    }
+
+
+  })
   
   export {
     addMemberToProject,
