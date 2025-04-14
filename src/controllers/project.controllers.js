@@ -203,16 +203,25 @@ const deleteMember = async (req, res) => {
     const checkUserRole= await ProjectMember.findOne({role:"admin"})
 
     if(checkUserRole){
-        await ProjectMember.deleteOne({
+        const ismemberExist= await ProjectMember.findOneAndDelete({
             _id:member_id,
             project:project_id,
-            role:"member" || "project_admin"
+            $or:[{"role":"project_admin"},  {"role":"member"}]
         })
+
+        if(!ismemberExist){
+            return res
+            .status(400)
+            .json(new ApiResponse(400,"Member not found !"))
+        }
+        
+        return res
+        .status(200)
+        .json(new ApiResponse(200,"Member Delete Sucessfully"));
+
     }
 
-    return res
-    .status(200)
-    .json(new ApiResponse(200,"Member Delete Sucessfully"));
+   
 
   };
   
