@@ -2,22 +2,19 @@ import {Router} from "express";
 import isLoggedIn from "../middlewares/auth.middleware.js"
 import { createNote, deleteNote, getallnotes, getnoteById, updateNote } from "../controllers/note.controllers.js";
 
+
+import { noteValidator } from "../validators/note.validator.js";
+import { validate } from "../middlewares/validator.middleware.js";
 const router=Router()
 
-router.route("/createnote/:project_id")
-.post(isLoggedIn,createNote)
-
-router.route("/updatenote/:project_id")
-.post(isLoggedIn,updateNote)
-
-router.route("/deletenote/:project_id")
-.delete(isLoggedIn,deleteNote)
-
-router.route("/getnotes/:project_id")
+router.route("/")
 .get(isLoggedIn,getallnotes)
+.post(isLoggedIn,noteValidator(),validate,createNote)
 
 
-router.route("/getnoteById/:project_id/note/:note_id")
+router.route("/:note_id")
+.put(isLoggedIn,noteValidator(),validate,updateNote)
+.delete(isLoggedIn,deleteNote)
 .get(isLoggedIn,getnoteById)
 
 

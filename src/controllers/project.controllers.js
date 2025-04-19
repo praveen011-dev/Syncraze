@@ -10,51 +10,11 @@ import {asyncHandler} from '../utils/async-handler.js'
 import { UserRolesEnum } from "../utils/constants.js";
 
 
-const getProjects = asyncHandler(async (req, res) => {
 
-    const projectmember=await ProjectMember.findOne({user:req.user._id});
-    
-    const allprojects= await Project.findOne({_id:projectmember.project})
-    console.log(allprojects)
-
-    if(!allprojects){
-        return res
-        .status(400)
-        .json(new ApiResponse(400, "No Projects Found in this Account"));
-    }
-
-    return res
-    .status(200)
-    .json(new ApiResponse(200,allprojects,"Your Projects",))
-})
   
-const getProjectById = asyncHandler(async (req, res) => {
+const createProject = asyncHandler(async (req, res,next) => {
 
-    const {project_id}=req.params
-
-    const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
-
-    if(!project){
-        return res
-        .status(400)
-        .json(new ApiResponse(400, "Either you are not eligible to get Project or Project not found!"));
-    }
-
-    return res
-    .status(200)
-    .json(new ApiResponse(200,project,"Project Found Successfully"))
-
-})
-  
-const createProject = asyncHandler(async (req, res) => {
-    // create project
     const {name,description}=req.body
-
-    if(!name){
-        return res
-        .status(400)
-        .json(new ApiError(400, { message: "Please enter Project name" }));
-    }
 
     const projectExist=await Project.findOne({name})
 
@@ -161,22 +121,46 @@ const deleteProject = asyncHandler(async (req, res) => {
   }
 )
   
-const getProjectMembers= asyncHandler(async (req, res) => {
+const getProjects = asyncHandler(async (req, res) => {
 
-    const {project_id}=req.params
+    const projectmember=await ProjectMember.findOne({user:req.user._id});
+    
+    const allprojects= await Project.findOne({_id:projectmember.project})
+    console.log(allprojects)
 
-    const allprojectMembers= await ProjectMember.find({project:project_id,user:req.user._id})
-
-    if(!allprojectMembers || allprojectMembers.length === 0){
+    if(!allprojects){
         return res
         .status(400)
-        .json(new ApiResponse(400, "Either you are not eligible to get all project members or No ProjectMembers Found in this Project"));
+        .json(new ApiResponse(400, "No Projects Found in this Account"));
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200,allprojectMembers,"All Members",))
-  })
+    .json(new ApiResponse(200,allprojects,"Your Projects",))
+})
+  
+const getProjectById = asyncHandler(async (req, res) => {
+
+    const {project_id}=req.params
+
+    const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
+
+    if(!project){
+        return res
+        .status(400)
+        .json(new ApiResponse(400, "Either you are not eligible to get Project or Project not found!"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,project,"Project Found Successfully"))
+
+})
+
+
+
+//Project Members Controllers
+
   
 const addMemberToProject = asyncHandler(async (req, res) => {
     // add member to project
@@ -289,7 +273,28 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 
   })
   
-  export {
+
+const getProjectMembers= asyncHandler(async (req, res) => {
+
+    const {project_id}=req.params
+
+    const allprojectMembers= await ProjectMember.find({project:project_id,user:req.user._id})
+
+    if(!allprojectMembers || allprojectMembers.length === 0){
+        return res
+        .status(400)
+        .json(new ApiResponse(400, "Either you are not eligible to get all project members or No ProjectMembers Found in this Project"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,allprojectMembers,"All Members",))
+  })
+
+
+
+
+ export {
     addMemberToProject,
     createProject,
     deleteMember,

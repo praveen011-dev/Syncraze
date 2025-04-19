@@ -17,7 +17,7 @@ import { ApiError } from "../utils/api.error.js";
     }))
 
 
-    throw new ApiError(422,"Recieved data is not valid",extractedError)
+    return next(new ApiError(400,extractedError,"Error while updating role"));
 }
 
 

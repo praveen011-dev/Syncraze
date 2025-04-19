@@ -24,12 +24,6 @@ const createTask=asyncHandler(async(req,res)=>{
         }=req.body
 
 
-    if(!title ||!assignedTo ){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Please fill the required Details"));
-    }
-
     const AssignedUser=await User.findOne({email:assignedTo})
     console.log(AssignedUser);
 
@@ -38,12 +32,9 @@ const createTask=asyncHandler(async(req,res)=>{
         .status(400)
         .json(new ApiResponse(400,"Assigned User not found"))
     }
-
-    console.log(AssignedUser._id)
     
     const IsProjectMember=await ProjectMember.find({user:AssignedUser._id})
 
-    console.log(IsProjectMember);
 
     if(!IsProjectMember){
         return res
@@ -51,7 +42,6 @@ const createTask=asyncHandler(async(req,res)=>{
         .json(new ApiResponse(400,"Project not Assigned to this user"))
     }
 
-    console.log("hello")
     const task= await Task.create({
         title,
         description,
@@ -88,12 +78,6 @@ const updateTask=asyncHandler(async(req,res)=>{
         attachments:newAttachments
         }=req.body
 
-    
-        if(!newTitle ||!newAssignedTo ){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Please fill the required Details"));
-            }
 
     const AssignedUser=await User.findOne({email:newAssignedTo})
 
@@ -234,11 +218,6 @@ const createSubtask=asyncHandler(async(req,res)=>{
     const {task_id}=req.params
     const {title}=req.body
     
-    if(!title){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"title required"))
-    }
 
     if(!task_id){
         return res
@@ -272,11 +251,6 @@ const updateSubtask=asyncHandler(async(req,res)=>{
     const {subtask_id}=req.params
     const {title:newTitle}=req.body
     
-    if(!newTitle){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"title required"))
-    }
 
     if(!subtask_id){
         return res

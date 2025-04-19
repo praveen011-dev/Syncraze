@@ -7,7 +7,7 @@ import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser
 
 import { validate } from "../middlewares/validator.middleware.js";
 
-import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/index.js";
+import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/user.validator.js";
 
 import isLoggedIn from "../middlewares/auth.middleware.js";
 

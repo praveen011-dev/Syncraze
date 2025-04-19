@@ -13,17 +13,17 @@ const createNote=asyncHandler(async(req,res)=>{
             .json(new ApiResponse(400,"Project not found!"))
         }
 
-        if(!content){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Please Provide Note Content"))
-        }
-
         const note=await ProjectNote.create({
             project:project_id,
             createdBy:req.user._id,
-            content:content
+            content
         })  
+
+        if(!note){
+            return res
+            .status(400)
+            .json(new ApiResponse(400,"Error while creating a note"))
+        }
 
         return res
         .status(200)
@@ -34,30 +34,23 @@ const createNote=asyncHandler(async(req,res)=>{
 
 const updateNote=asyncHandler(async(req,res)=>{
 
-        const {project_id}=req.params
-        const {newContent}=req.body
+        const {project_id,note_id}=req.params
+        const {content:newContent}=req.body
 
         if(!project_id){
             return res
             .status(400)
-            .json(new ApiResponse(400,"Project not found!"))
+            .json(new ApiResponse(400,"projectId is required!"))
         }
 
-        if(!newContent){
+        if(!note_id){
             return res
             .status(400)
-            .json(new ApiResponse(400,"Please Provide content to update"))
+            .json(new ApiResponse(400,"NoteId required!"))
         }
 
-        const existingNote=await ProjectNote.findOne({project:project_id,createdBy:req.user._id}) 
 
-        if(!existingNote){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Note not found!"))
-        }
-
-        const updatedNote=await ProjectNote.findByIdAndUpdate({_id:existingNote._id},{content:newContent},{new :true})
+        const updatedNote=await ProjectNote.findByIdAndUpdate({_id:note_id,project:project_id,createdBy:req.user._id},{content:newContent},{new :true})
 
             return res
             .status(200)
@@ -67,22 +60,27 @@ const updateNote=asyncHandler(async(req,res)=>{
 
 
 const deleteNote=asyncHandler(async(req,res)=>{
-    const {project_id}=req.params
+    const {project_id,note_id}=req.params
     if(!project_id){
         return res
         .status(400)
-        .json(new ApiResponse(400,"Project not found!"))
+        .json(new ApiResponse(400,"projectId is required!"))
     }
 
-    const existingNote=await ProjectNote.findOne({project:project_id,createdBy:req.user._id}) 
-
-    if(!existingNote){
+    if(!note_id){
         return res
         .status(400)
-        .json(new ApiResponse(400,"Note not found!"))
+        .json(new ApiResponse(400,"NoteId required!"))
     }
 
-    await ProjectNote.findByIdAndDelete({_id:existingNote._id})
+
+    const note=await ProjectNote.findByIdAndDelete({_id:note_id,project:project_id,createdBy:req.user._id})
+
+    if(!note){
+        return res
+        .status(400)
+        .json(new ApiResponse(400,"Error While deleting the note"));
+    }
 
     return res
     .status(200)
@@ -130,7 +128,6 @@ const getnoteById=asyncHandler(async(req,res)=>{
         .status(400)
         .json(new ApiResponse(400,"Invalid note id"))
     }
-
 
     const singlenote= await ProjectNote.find({_id:note_id,createdBy:req.user._id})
 

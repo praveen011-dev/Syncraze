@@ -1,33 +1,36 @@
 import {Router} from "express";
 import { addMemberToProject, createProject, deleteMember, deleteProject, getProjectById, getProjectMembers, getProjects, updateMemberRole, updateProject } from "../controllers/project.controllers.js";
+
 import isLoggedIn from "../middlewares/auth.middleware.js";
+
+import { addMemberValidator,ProjectValidator } from "../validators/project.validator.js";
+
+import { validate } from "../middlewares/validator.middleware.js";
 
 const router=Router()
 
-router.post("/createProject",isLoggedIn,createProject)
-router.post("/updateProject/:project_id",isLoggedIn,updateProject)
-router.delete("/deleteProject/:project_id",isLoggedIn,deleteProject)
+//Project Routes
 
-router.route("/getProject/:project_id")
-.get(isLoggedIn,getProjectById)
-.post(isLoggedIn,addMemberToProject)
-
-router.route("/getProjects")
+router.route("/")
+.post(isLoggedIn,ProjectValidator(),validate,createProject)
 .get(isLoggedIn,getProjects)
+
+router.route("/:project_id")
+
+.get(isLoggedIn,getProjectById)
+.put(isLoggedIn,updateProject)
+.delete(isLoggedIn,deleteProject)
+
+
 
 //Project Members Routes
 
-router.route("/addMemberToProject/:project_id")
-.post(isLoggedIn,addMemberToProject)
-
-
-router.route("/deleteMember/:project_id/memberid/:member_id")
-.delete(isLoggedIn,deleteMember)
-
-router.route("/allprojectMembers/:project_id")
+router.route("/:project_id/members")
+.post(isLoggedIn,addMemberValidator(),validate,addMemberToProject)
 .get(isLoggedIn,getProjectMembers)
 
-router.route("/updateMember/:project_id/memberid/:member_id")
-.post(isLoggedIn,updateMemberRole)
+router.route("/:project_id/members/:member_id")
+.delete(isLoggedIn,deleteMember)
+.put(isLoggedIn,updateMemberRole)
 
 export default router

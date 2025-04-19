@@ -25,7 +25,6 @@ const userRegistrationValidator = () => {
   ];
 };
 
-
 const userLoginValidator=()=>{
   return [
     oneOf([
@@ -67,7 +66,6 @@ const userResendEmailVerificationValidator=()=>{
     body('email')
           .isEmail().withMessage("Enter a valid email")
           .notEmpty().withMessage("email is required")
-
     ]
 }
 
