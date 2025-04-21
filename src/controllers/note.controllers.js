@@ -1,16 +1,16 @@
 import { ProjectNote } from '../models/note.models.js'
 import { ApiResponse } from '../utils/api.response.js'
 import {asyncHandler} from '../utils/async-handler.js'
+import { ApiError } from "../utils/api.error.js";
 
 
-const createNote=asyncHandler(async(req,res)=>{
+
+const createNote=asyncHandler(async(req,res,next)=>{
 
         const {project_id}=req.params
         const {content}=req.body
         if(!project_id){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Project not found!"))
+            return next(new ApiError(400,"Project not found!"))
         }
 
         const note=await ProjectNote.create({
@@ -20,9 +20,7 @@ const createNote=asyncHandler(async(req,res)=>{
         })  
 
         if(!note){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Error while creating a note"))
+            return next(new ApiError(400,"Error while creating a note"))
         }
 
         return res
@@ -32,21 +30,17 @@ const createNote=asyncHandler(async(req,res)=>{
 })
 
 
-const updateNote=asyncHandler(async(req,res)=>{
+const updateNote=asyncHandler(async(req,res,next)=>{
 
         const {project_id,note_id}=req.params
         const {content:newContent}=req.body
 
         if(!project_id){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"projectId is required!"))
+            return next(new ApiError(400,"projectId is required!"))
         }
 
         if(!note_id){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"NoteId required!"))
+            return next(new ApiError(400,"NoteId required!"))
         }
 
 
@@ -59,27 +53,21 @@ const updateNote=asyncHandler(async(req,res)=>{
 })
 
 
-const deleteNote=asyncHandler(async(req,res)=>{
+const deleteNote=asyncHandler(async(req,res,next)=>{
     const {project_id,note_id}=req.params
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"projectId is required!"))
+        return next(new ApiError(400,"projectId is required!"))
     }
 
     if(!note_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"NoteId required!"))
+        return next(new ApiError(400,"NoteId required!"))
     }
 
 
     const note=await ProjectNote.findByIdAndDelete({_id:note_id,project:project_id,createdBy:req.user._id})
 
     if(!note){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Error While deleting the note"));
+        return next(new ApiError(400,"Error While deleting the note"));
     }
 
     return res
@@ -88,20 +76,16 @@ const deleteNote=asyncHandler(async(req,res)=>{
     
 })
 
-const getallnotes=asyncHandler(async(req,res)=>{
+const getallnotes=asyncHandler(async(req,res,next)=>{
     const {project_id}=req.params
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project not found!"))
+        return next(new ApiError(400,"Project not found!"))
     }
 
     const allnotes= await ProjectNote.find({project:project_id,createdBy:req.user._id})
 
     if(!allnotes){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"No notes found in this project"))
+        return next(new ApiError(400,"No notes found in this project"))
     }
 
 
@@ -115,26 +99,20 @@ const getallnotes=asyncHandler(async(req,res)=>{
 
 
 
-const getnoteById=asyncHandler(async(req,res)=>{
+const getnoteById=asyncHandler(async(req,res,next)=>{
     const {project_id,note_id}=req.params
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project not found!"))
+        return next(new ApiError(400,"Project not found!"))
     }
 
     if(!note_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid note id"))
+        return next(new ApiError(400,"Invalid note id"))
     }
 
     const singlenote= await ProjectNote.find({_id:note_id,createdBy:req.user._id})
 
     if(!singlenote){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"No note found in this project"))
+        return next(new ApiError(400,"No note found in this project"))
     }
 
 
