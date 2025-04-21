@@ -19,9 +19,7 @@ const createProject = asyncHandler(async (req, res,next) => {
     const projectExist=await Project.findOne({name})
 
     if(projectExist){
-         return res
-         .status(400)
-         .json(new ApiResponse(400, "Project name already exist choose different" ));
+        return next(new ApiError(400, "Project name already exist choose different"));
     }
 
     const project =await Project.create({
@@ -45,10 +43,7 @@ const createProject = asyncHandler(async (req, res,next) => {
   }
 )
   
-const updateProject = asyncHandler(async (req, res) => {
-
-    // update project
-    const user=req.user
+const updateProject = asyncHandler(async (req, res,next) => {
 
     const {project_id}=req.params
     const {name:Newname,description:Newdescription}=req.body
@@ -56,9 +51,8 @@ const updateProject = asyncHandler(async (req, res) => {
     const projectExist=await Project.findOne({name:Newname})
 
     if(projectExist){
-         return res
-         .status(400)
-         .json(new ApiResponse(400,"Project name already exist choose different" ));
+        return next(new ApiError(400, "Project name already exist choose different"));
+
     }
 
     const project=await Project.findOneAndUpdate({_id:project_id,createdBy:req.user._id},{
@@ -67,11 +61,7 @@ const updateProject = asyncHandler(async (req, res) => {
     })
 
     if(!project){
-
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Either you are not eligible to update Project or Project not found!"));
-
+        return next(new ApiError(400, "Either you are not eligible to update Project or Project not found!"));
     }
 
     return res
@@ -80,19 +70,16 @@ const updateProject = asyncHandler(async (req, res) => {
 
   })
   
-const deleteProject = asyncHandler(async (req, res) => {
+const deleteProject = asyncHandler(async (req, res,next) => {
 
     const {project_id}=req.params
 
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project id Missing"))
+        return next(new ApiError(400, "Project Id Missing!"));
     }
 
 
     const project=await Project.findOneAndDelete({_id:project_id,createdBy:req.user._id})
-
 
     const tasks = await Task.find({ project: project_id }, '_id'); 
 
@@ -107,9 +94,8 @@ const deleteProject = asyncHandler(async (req, res) => {
    
 
     if(!project){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Either you are not eligible to delete Project or Project not found!"));
+
+        return next(new ApiError(400, "Either you are not eligible to delete Project or Project not found!"));
     }
 
 
@@ -121,17 +107,14 @@ const deleteProject = asyncHandler(async (req, res) => {
   }
 )
   
-const getProjects = asyncHandler(async (req, res) => {
+const getProjects = asyncHandler(async (req, res,next) => {
 
     const projectmember=await ProjectMember.findOne({user:req.user._id});
     
     const allprojects= await Project.findOne({_id:projectmember.project})
-    console.log(allprojects)
 
     if(!allprojects){
-        return res
-        .status(400)
-        .json(new ApiResponse(400, "No Projects Found in this Account"));
+        return next(new ApiError(400,"No Projects Found in this account"));
     }
 
     return res
@@ -139,16 +122,14 @@ const getProjects = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200,allprojects,"Your Projects",))
 })
   
-const getProjectById = asyncHandler(async (req, res) => {
+const getProjectById = asyncHandler(async (req, res,next) => {
 
     const {project_id}=req.params
 
     const project=await Project.findOne({_id:project_id,createdBy:req.user._id})
 
     if(!project){
-        return res
-        .status(400)
-        .json(new ApiResponse(400, "Either you are not eligible to get Project or Project not found!"));
+        return next(new ApiError(400,"Unauthorised Access or Project not Found!"));
     }
 
     return res
@@ -162,7 +143,7 @@ const getProjectById = asyncHandler(async (req, res) => {
 //Project Members Controllers
 
   
-const addMemberToProject = asyncHandler(async (req, res) => {
+const addMemberToProject = asyncHandler(async (req, res,next) => {
     // add member to project
 
     
@@ -172,9 +153,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     const inputUser=await User.findOne({email:useremail})
 
     if(!inputUser){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"User not found please Signup! "))
+        return next(new ApiError(400,"User not Found!"))
     }
 
     const checkUserRole= await ProjectMember.findOne({role:"admin",project:project_id,user:req.user._id})
@@ -184,9 +163,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
        const existMember=await ProjectMember.findOne({user:inputUser._id,role:role})
     
        if(existMember){
-            return res
-            .status(200)
-            .json(new ApiResponse(200,"Member Already Exist"));
+            return next(new ApiError(400,"Member Already Exist"));
        }
        
         await ProjectMember.create({
@@ -200,15 +177,13 @@ const addMemberToProject = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200,"Project Member Added Successfully"));
     }
 
-    return res
-    .status(400)
-    .json(new ApiResponse(400,"Either you are not eligible to add member to this project or Project not found!"));
+    return next(new ApiError(400,"Either you are not eligible to add member to this project or Project not found!"));
    
     
     
 })
   
-const deleteMember = asyncHandler(async (req, res) => {
+const deleteMember = asyncHandler(async (req, res,next) => {
     // delete member from project
     const {project_id,member_id}=req.params
 
@@ -223,9 +198,7 @@ const deleteMember = asyncHandler(async (req, res) => {
         })
 
         if(!ismemberExist){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Either Member not found or Admin can't Delete yourSelf !"))
+            return next(new ApiError(400,"Either Member not found or Admin can't Delete yourSelf !"))
         }
 
         return res
@@ -234,13 +207,11 @@ const deleteMember = asyncHandler(async (req, res) => {
 
     }
 
-    return res
-    .status(400)
-    .json(new ApiResponse(400,"Either You Are not eligible to delete the member or member not Found"));
+    return next(new ApiError(400,"Either You Are not eligible to delete the member or member not Found"));
 
   })
   
-const updateMemberRole = asyncHandler(async (req, res) => {
+const updateMemberRole = asyncHandler(async (req, res,next) => {
     const {project_id,member_id}=req.params
 
     const {role}=req.body
@@ -255,9 +226,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
         },{role:role})
 
         if(!ismemberExist){
-            return res
-            .status(400)
-            .json(new ApiResponse(400,"Member not found!"))
+            return next(new ApiError(400,"Member not found!"))
         }
 
         return res
@@ -266,24 +235,20 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 
     }
 
-    return res
-    .status(400)
-    .json(new ApiResponse(400,"Either You Are not eligible to Update member role or member not Found"));
+    return next(new ApiError(400,"Either You Are not eligible to Update member role or member not Found"));
 
 
   })
   
 
-const getProjectMembers= asyncHandler(async (req, res) => {
+const getProjectMembers= asyncHandler(async (req, res,next) => {
 
     const {project_id}=req.params
 
     const allprojectMembers= await ProjectMember.find({project:project_id,user:req.user._id})
 
     if(!allprojectMembers || allprojectMembers.length === 0){
-        return res
-        .status(400)
-        .json(new ApiResponse(400, "Either you are not eligible to get all project members or No ProjectMembers Found in this Project"));
+        return next(new ApiError(400, "Either you are not eligible to get all project members or No ProjectMembers Found in this Project"));
     }
 
     return res
