@@ -23,16 +23,18 @@ app.use("/api/v1/projects/:projectId/notes", noteroutes);
 app.use("/api/v1/projects/:projectId/tasks", taskroutes);
 
 
+// 🔥 Global Error Handler
 app.use((err, _req, res, _next) => {
-    const statusCode = err.statusCode || 500;  
-  
-    res.status(statusCode).json({
-      statusCode,
-      message: err.message || "Internal Server Error",
-      errors: err.errors || [],
-      success: false,
-    });
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || [],
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
+});
+
 
 
 export default app;
