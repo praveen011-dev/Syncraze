@@ -1,5 +1,6 @@
 import {asyncHandler} from "../utils/async-handler.js"
 import {ApiResponse} from "../utils/api.response.js"
+import {ApiError} from "../utils/api.error.js"
 import {Task} from "../models/task.models.js"
 import  User from "../models/user.models.js"
 import { ProjectMember } from "../models/projectmember.models.js"
@@ -8,12 +9,10 @@ import { SubTask } from "../models/subtask.models.js"
 
 
 
-const createTask=asyncHandler(async(req,res)=>{
+const createTask=asyncHandler(async(req,res,next)=>{
     const {project_id}=req.params
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid project id"))
+        return next(new ApiError(400,"Invalid project id"))
     }
     const {
         title,
@@ -25,21 +24,16 @@ const createTask=asyncHandler(async(req,res)=>{
 
 
     const AssignedUser=await User.findOne({email:assignedTo})
-    console.log(AssignedUser);
 
     if(!AssignedUser){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Assigned User not found"))
+        return next(new ApiError(400,"Assigned User not found"))
     }
     
     const IsProjectMember=await ProjectMember.find({user:AssignedUser._id})
 
 
     if(!IsProjectMember){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project not Assigned to this user"))
+        return next(new ApiError(400,"Project not Assigned to this user"))
     }
 
     const task= await Task.create({
@@ -53,9 +47,7 @@ const createTask=asyncHandler(async(req,res)=>{
     })
 
     if(!task){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Please enter valid details"))
+        return next(new ApiError(400,"Please enter valid details"))
     }
 
     return res
@@ -63,12 +55,10 @@ const createTask=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,task,"Task Created Successfully"))
 })
 
-const updateTask=asyncHandler(async(req,res)=>{
+const updateTask=asyncHandler(async(req,res,next)=>{
     const {project_id,task_id}=req.params
     if(!project_id || !task_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid project OR task id"))
+        return next(new ApiError(400,"Invalid project OR task id"))
     }
     const {
         title:newTitle,
@@ -82,9 +72,7 @@ const updateTask=asyncHandler(async(req,res)=>{
     const AssignedUser=await User.findOne({email:newAssignedTo})
 
     if(!AssignedUser){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Assigned User not found"))
+        return next(new ApiError(400,"Assigned User not found"))
     }
 
     
@@ -92,17 +80,13 @@ const updateTask=asyncHandler(async(req,res)=>{
 
 
     if(!IsProjectMember){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project not Assigned to this user"))
+        return next(new ApiError(400,"Project not Assigned to this user"))
     }
 
     const task= await Task.findById({_id:task_id})
 
     if(!task){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Task not found"))
+        return next(new ApiError(400,"Task not found"))
     }
 
     const updatedTask= await Task.findByIdAndUpdate({_id:task_id},{
@@ -116,9 +100,7 @@ const updateTask=asyncHandler(async(req,res)=>{
     },{new:true})
 
     if(!updatedTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Please enter valid details"))
+        return next(new ApiError(400,"Please enter valid details"))
     }
 
     return res
@@ -126,12 +108,10 @@ const updateTask=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,updatedTask,"Task Updated Successfully"))
 })
 
-const deleteTask=asyncHandler(async(req,res)=>{
+const deleteTask=asyncHandler(async(req,res,next)=>{
     const {project_id,task_id}=req.params
     if(!project_id || !task_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid project id OR task id"))
+        return next(new ApiError(400,"Invalid project id OR task id"))
     }
 
 
@@ -139,20 +119,14 @@ const deleteTask=asyncHandler(async(req,res)=>{
 
 
     if(!IsProjectMember){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Project not Assigned to this user"))
+        return next(new ApiError(400,"Project not Assigned to this user"))
     }
-
-    console.log(task_id);
 
     const deletedTask= await Task.findByIdAndDelete({_id:task_id})
 
 
     if(!deletedTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,deleteTask,"Task not found or Deleted"))
+        return next(new ApiError(400,deleteTask,"Task not found or Deleted"))
     }
 
     return res
@@ -162,12 +136,10 @@ const deleteTask=asyncHandler(async(req,res)=>{
 
 })
 
-const getTasks=asyncHandler(async(req,res)=>{
+const getTasks=asyncHandler(async(req,res,next)=>{
     const {project_id}=req.params
     if(!project_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid project id "))
+        return next(new ApiError(400,"Invalid project id "))
     }
 
     const allTasks= await Task.findOne({project:project_id,
@@ -175,9 +147,7 @@ const getTasks=asyncHandler(async(req,res)=>{
 
 
     if(!allTasks || allTasks.length==0){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"no Tasks Found in this account"))
+        return next(new ApiError(400,"no Tasks Found in this account"))
     }
 
         return res
@@ -187,12 +157,10 @@ const getTasks=asyncHandler(async(req,res)=>{
 
 })
 
-const getTaskById=asyncHandler(async(req,res)=>{
+const getTaskById=asyncHandler(async(req,res,next)=>{
     const {project_id,task_id}=req.params
     if(!project_id || !task_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"Invalid project OR task id"))
+        return next(new ApiError(400,"Invalid project OR task id"))
     }
 
     const getTask=await Task.findOne({_id:task_id,project:project_id,
@@ -200,29 +168,25 @@ const getTaskById=asyncHandler(async(req,res)=>{
     })
 
     if(!getTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"No Task found!"))
+        return next(new ApiError(400,"No Task found!"))
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200,getTask,"Task Found Successfully"))
+    .json(new ApiResponse(200,"Task Found Successfully",getTask))
 
 })
 
 //Subtask Controllers
 
 
-const createSubtask=asyncHandler(async(req,res)=>{
+const createSubtask=asyncHandler(async(req,res,next)=>{
     const {task_id}=req.params
     const {title}=req.body
     
 
     if(!task_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"task id Required"))
+        return next(new ApiError(400,"task id Required"))
     }
 
     const getTask=await Task.findOne({_id:task_id,
@@ -231,9 +195,7 @@ const createSubtask=asyncHandler(async(req,res)=>{
 
     
     if(!getTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"No Task found!"))
+        return next(new ApiError(400,"No Task found!"))
     }
 
     const subtask=await SubTask.create({
@@ -247,15 +209,13 @@ const createSubtask=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,subtask,"SubTask Created Successfully"))
 })
 
-const updateSubtask=asyncHandler(async(req,res)=>{
+const updateSubtask=asyncHandler(async(req,res,next)=>{
     const {subtask_id}=req.params
     const {title:newTitle}=req.body
     
 
     if(!subtask_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"subtask id Required"))
+        return next(new ApiError(400,"subtask id Required"))
     }
 
    
@@ -263,9 +223,7 @@ const updateSubtask=asyncHandler(async(req,res)=>{
     const subTask= await SubTask.findById({_id:subtask_id})
 
     if(!subTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"SubTask not found"))
+        return next(new ApiError(400,"SubTask not found"))
     }
 
     const updatedSubtask=await SubTask.findByIdAndUpdate({_id:subtask_id},{
@@ -278,34 +236,28 @@ const updateSubtask=asyncHandler(async(req,res)=>{
 
     return res
     .status(200)
-    .json(new ApiResponse(200,updatedSubtask,"SubTask Update Successfully"))
+    .json(new ApiResponse(200,"SubTask Update Successfully",updatedSubtask))
 })
 
 
-const deleteSubtask=asyncHandler(async(req,res)=>{
+const deleteSubtask=asyncHandler(async(req,res,next)=>{
     const {subtask_id}=req.params
     
     if(!subtask_id){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"subtask id Required"))
+        return next(new ApiError(400,"subtask id Required"))
     }
 
 
     const subTask= await SubTask.findById({_id:subtask_id})
 
     if(!subTask){
-        return res
-        .status(400)
-        .json(new ApiResponse(400,"SubTask not found"))
+        return next(new ApiError(400,"SubTask not found"))
     }
 
     const deleteSubtask=await SubTask.findByIdAndDelete({_id:subtask_id,createdBy:req.user._id})
 
     if(!deleteSubtask){
-    return res
-    .status(400)
-    .json(new ApiResponse(400,"Task can't be delete"))
+    return next(new ApiError(400,"Task can't be delete"))
     }
 
 
