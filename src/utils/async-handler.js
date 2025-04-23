@@ -1,4 +1,12 @@
 function asyncHandler(requesthandler){
+   
+}
+
+
+export {asyncHandler}
+
+
+function asyncHandler(requesthandler){
     return function(req,res,next){
         Promise.resolve(requesthandler(req,res,next))
         .catch(function(err){
@@ -7,5 +15,15 @@ function asyncHandler(requesthandler){
     }
 }
 
+// return function(req,res,next){
+//     Promise.resolve(requesthandler(req,res,next))
+//     .catch(function(err){
+//         next(err)
+//     })
+// }
 
-export {asyncHandler}
+
+// asyncHandler(async function handler(req, res, next) {
+//     const data = await getData(); // could fail
+//     res.send(data);
+//   })
