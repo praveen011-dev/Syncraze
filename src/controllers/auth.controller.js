@@ -82,8 +82,8 @@ const verifyEmail = asyncHandler(async (req, res,next) => {
 
 
     const user= await User.findOne({
-      emailVerficationToken:userHashedToken,
-      emailVerficationExpiry:{$gt:Date.now()}
+      emailVerificationToken:userHashedToken,
+      emailVerificationExpiry:{$gt:Date.now()}
      })
 
      if(!user){
@@ -91,8 +91,8 @@ const verifyEmail = asyncHandler(async (req, res,next) => {
      }
 
      user.isEmailVerified=true
-     user.emailVerficationToken=undefined
-     user.emailVerficationExpiry=undefined
+     user.emailVerificationToken=undefined
+     user.emailVerificationExpiry=undefined
      
      await user.save();
 
@@ -374,8 +374,6 @@ const getCurrentUser = asyncHandler(async (req, res,next) => {
 });
 
 
-console.log("Defined RegisterUser:", RegisterUser);
-console.log("Defined LoginUser:", LoginUser);
 
 
 export { 

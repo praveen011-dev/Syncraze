@@ -148,9 +148,9 @@ const addMemberToProject = asyncHandler(async (req, res,next) => {
 
     
     const {project_id}=req.params
-    const {useremail,role}=req.body
+    const {userEmail,role}=req.body
 
-    const inputUser=await User.findOne({email:useremail})
+    const inputUser=await User.findOne({email:userEmail})
 
     if(!inputUser){
         return next(new ApiError(400,"User not Found!"))

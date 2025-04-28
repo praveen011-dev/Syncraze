@@ -10,12 +10,6 @@ import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidat
 import isLoggedIn from "../middlewares/auth.middleware.js";
 
 
-console.log("userRegistrationValidator:", userRegistrationValidator);
-console.log("validate:", validate);
-
-
-
-
 
 router.post("/register",RegisterUser );
  //Factory pattern
