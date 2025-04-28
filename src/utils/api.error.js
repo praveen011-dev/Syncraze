@@ -4,8 +4,8 @@ class ApiError extends Error{
         super(message);
         this.statusCode=statusCode
         this.message=message
-        this.success=false
         this.errors=errors
+        this.success=false
 
         if(stack){
             this.stack=stack

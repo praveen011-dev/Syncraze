@@ -4,7 +4,7 @@ import { createNote, deleteNote, getallnotes, getnoteById, updateNote } from "..
 
 
 import { noteValidator } from "../validators/note.validator.js";
-import { validate } from "../middlewares/validator.middleware.js";
+import  validate  from "../middlewares/validator.middleware.js";
 const router=Router()
 
 router.route("/")

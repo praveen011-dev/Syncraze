@@ -1,19 +1,24 @@
 import {Router} from "express";
 const router=Router()
 
+import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, resendEmailVerification, resetForgottenPassword, verifyEmail, RegisterUser } from "../controllers/auth.controller.js";
 
-
-import { changeCurrentPassword, forgotPasswordRequest, getCurrentUser, LoginUser, logoutUser, refreshAccessToken, registerUser, resendEmailVerification, resetForgottenPassword, verifyEmail } from "../controllers/authcontrollers.js";
-
-import { validate } from "../middlewares/validator.middleware.js";
+import validate  from "../middlewares/validator.middleware.js";
 
 import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/user.validator.js";
 
 import isLoggedIn from "../middlewares/auth.middleware.js";
 
 
-router.route("/register")
-.post(userRegistrationValidator(),validate,registerUser) //Factory pattern
+console.log("userRegistrationValidator:", userRegistrationValidator);
+console.log("validate:", validate);
+
+
+
+
+
+router.post("/register",RegisterUser );
+ //Factory pattern
 
 router.get("/verify/:unHashedToken",verifyEmail)
 
@@ -35,4 +40,4 @@ router.post("/change-password",isLoggedIn,changeCurrentPassword)
 
 
 
-export default router
+export default router;

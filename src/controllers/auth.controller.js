@@ -20,26 +20,30 @@ try {
     await user.save();
   
     return {accessToken,refreshToken}
-} catch (error) {
-  //err will be here!
+}catch (error) {
+  return next(new ApiError(500, "Token generation failed"));
 }
 }
 
 //Register User
-const registerUser = asyncHandler(async (req, res,next) => {
-  const { email, username, password, role } = req.body;
-  const existingUser = await User.findOne({ email });
 
-  if (existingUser) {
-    return next(new ApiError(400, "User already exists"));
+
+const RegisterUser=asyncHandler(async(req,res,next)=>{
+  const {email,username,password,role}=req.body
+
+  const existinguser=await User.findOne({email})
+
+  if(existinguser){
+    return next(new ApiError(400,"User Already Exist!"))
   }
 
-  const user = await User.create({
-    username,
+  const user= await User.create({
     email,
+    username,
     password,
-    role,
-  });
+    role
+  })
+
 
   // create verification token
 
@@ -110,7 +114,7 @@ const LoginUser=asyncHandler(async(req,res,next)=>{
 
   //password check by isPassword method
 
-  const passwordcheck=user.isPasswordCorrect(password)
+  const passwordcheck=await user.isPasswordCorrect(password)
 
   if(!passwordcheck){
     return next(new ApiError(400, "User Creditials is incorrect"));
@@ -147,6 +151,7 @@ const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._
 }
 )
 
+
 //Refresh-AccessToken
 const refreshAccessToken = asyncHandler(async (req, res,next) => {
 
@@ -166,7 +171,7 @@ const refreshAccessToken = asyncHandler(async (req, res,next) => {
        }
  
        if(incomeRToken !==user?.refreshToken){
-        return next(new ApiError(400, "Refresh Token is expire or used"));
+        return next(new ApiError(400, "Refresh Token is expired or used"));
 
        }
  
@@ -368,9 +373,14 @@ const getCurrentUser = asyncHandler(async (req, res,next) => {
   )
 });
 
+
+console.log("Defined RegisterUser:", RegisterUser);
+console.log("Defined LoginUser:", LoginUser);
+
+
 export { 
-  registerUser,
   verifyEmail,
+  RegisterUser,
   LoginUser,
   refreshAccessToken,
   logoutUser,

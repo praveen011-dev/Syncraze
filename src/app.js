@@ -23,7 +23,7 @@ app.use("/api/v1/projects/:projectId/notes", noteroutes);
 app.use("/api/v1/projects/:projectId/tasks", taskroutes);
 
 
-// 🔥 Global Error Handler
+//global error handler
 app.use((err, _req, res, _next) => {
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

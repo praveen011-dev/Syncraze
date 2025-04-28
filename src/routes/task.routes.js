@@ -3,7 +3,7 @@ import isLoggedIn from "../middlewares/auth.middleware.js"
 import { createSubtask, createTask, deleteSubtask, deleteTask, getTaskById, getTasks, updateSubtask, updateTask } from "../controllers/task.controllers.js";
 
 import { taskValidator,subTaskValidator } from "../validators/task.validator.js";
-import { validate } from "../middlewares/validator.middleware.js";
+import validate  from "../middlewares/validator.middleware.js";
 
 const router=Router()
 

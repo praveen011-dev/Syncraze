@@ -5,7 +5,7 @@ import isLoggedIn from "../middlewares/auth.middleware.js";
 
 import { addMemberValidator,ProjectValidator } from "../validators/project.validator.js";
 
-import { validate } from "../middlewares/validator.middleware.js";
+import validate  from "../middlewares/validator.middleware.js";
 
 const router=Router()
 
