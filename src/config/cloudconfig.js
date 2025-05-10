@@ -15,7 +15,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,  
   params: {
-    folder: "syncraze/userAvatar", 
+    folder: "syncraze", 
     allowed_formats: ["png", "jpg", "jpeg", "webp"], 
     public_id: (req, _file) => {
       return `${req.body.username}-${Date.now()}`; 
