@@ -7,11 +7,14 @@ import validate  from "../middlewares/validator.middleware.js";
 
 import { userRegistrationValidator,userLoginValidator, userForgetPasswordValidator,userResetPasswordValidator, userResendEmailVerificationValidator } from "../validators/user.validator.js";
 
+import { upload } from "../middlewares/multer.middleware.js";
+
 import isLoggedIn from "../middlewares/auth.middleware.js";
 
 
 
-router.post("/register",RegisterUser );
+router.post("/register",upload.single("avatar"),
+userRegistrationValidator(),validate,RegisterUser );
  //Factory pattern
 
 router.get("/verify/:unHashedToken",verifyEmail)
